@@ -1,14 +1,15 @@
-import { useAuth0 } from "@auth0/auth0-react";
+
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 import { Restaurant } from "../types";
+import { useKeycloak } from "react-keycloak-js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const useGetMyRestaurant = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { keycloak } = useKeycloak();
   const getMyRestaurantRequest = async (): Promise<Restaurant> => {
-    const token = await getAccessTokenSilently();
+    const token = keycloak?.idToken;
     const response = await fetch(`${API_BASE_URL}/api/my/restaurant`, {
       method: "GET",
       headers: {
@@ -30,11 +31,12 @@ export const useGetMyRestaurant = () => {
 };
 
 export const useCreateMyRestaurant = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { keycloak } = useKeycloak();
+
   const createMyRestaurantRequest = async (
     restaurantFormData: FormData
   ): Promise<Restaurant> => {
-    const token = await getAccessTokenSilently();
+    const token = keycloak?.idToken;
     const response = await fetch(`${API_BASE_URL}/api/my/restaurant`, {
       method: "POST",
       headers: {
@@ -64,11 +66,12 @@ export const useCreateMyRestaurant = () => {
 };
 
 export const useUpdateMyRestaurant = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { keycloak } = useKeycloak();
+
   const updatedRestaurantRequest = async (
     restaurantFormData: FormData
   ): Promise<Restaurant> => {
-    const token = await getAccessTokenSilently();
+    const token = keycloak?.idToken;
     const response = await fetch(`${API_BASE_URL}/api/my/restaurant`, {
       method: "PUT",
       headers: {

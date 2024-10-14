@@ -1,4 +1,3 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import LoadingButton from "./LoadingButton";
@@ -7,6 +6,7 @@ import UserProfileForm, {
   UserFormData,
 } from "../forms/user-profile-form/UserProfileForm";
 import { useGetMyUser } from "../api/MyUserApi";
+import { useKeycloak } from "react-keycloak-js";
 
 type Props = {
   onCheckout: (userFormData: UserFormData) => void;
@@ -14,24 +14,16 @@ type Props = {
 };
 
 const CheckoutButton = ({ disabled, onCheckout }: Props) => {
-  const {
-    isAuthenticated,
-    isLoading: isAuthLoading,
-    loginWithRedirect,
-  } = useAuth0();
+  const { keycloak } = useKeycloak();
 
-  const { pathname } = useLocation();
+  // const { pathname } = useLocation();
 
   const { currentUser, isLoading: isGetUserLoading } = useGetMyUser();
 
   const onLoging = async () => {
-    await loginWithRedirect({
-      appState: {
-        returnTo: pathname,
-      },
-    });
+    keycloak?.login();
   };
-  if (!isAuthenticated || !currentUser) {
+  if (!keycloak?.authenticated || !currentUser) {
     return (
       <Button onClick={onLoging} className="bg-green-500 flex-1">
         Log in to Check out
@@ -39,9 +31,6 @@ const CheckoutButton = ({ disabled, onCheckout }: Props) => {
     );
   }
 
-  if (isAuthLoading) {
-    return <LoadingButton />;
-  }
   return (
     <Dialog>
       <DialogTrigger asChild>

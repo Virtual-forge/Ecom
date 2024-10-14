@@ -2,13 +2,15 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./layouts/layout";
 import HomePage from "./pages/HomePage";
 import AuthCallbackPage from "./auth/AuthCallbackPage";
-import UserProfilePage from "./pages/UserProfilePage";
-import ProtectedRoute from "./auth/protectedRoute";
+
+import SellerProtectedRoute from "./auth/SellerProtectedRoute";
 import ManageRestaurantPage from "./pages/ManageRestaurantPage";
 import SearchPage from "./pages/SearchPage";
 import DetailsPage from "./pages/DetailsPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import OrdersPage from "./pages/OrdersPage";
+import AdminProtectedRoute from "./auth/AdminProtectedRoute";
+import AdminPage from "./pages/AdminPage";
 
 const AppRoutes = () => {
   return (
@@ -54,20 +56,22 @@ const AppRoutes = () => {
           </Layout>
         }
       />
-      <Route element={<ProtectedRoute />}>
-        <Route
-          path="/user-profile"
-          element={
-            <Layout>
-              <UserProfilePage />
-            </Layout>
-          }
-        />
+      <Route element={<SellerProtectedRoute />}>
         <Route
           path="/manage-restaurant"
           element={
             <Layout>
               <ManageRestaurantPage />
+            </Layout>
+          }
+        />
+      </Route>
+      <Route element={<AdminProtectedRoute />}>
+        <Route
+          path="/adminpage"
+          element={
+            <Layout>
+              <AdminPage />
             </Layout>
           }
         />

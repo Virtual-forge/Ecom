@@ -1,26 +1,48 @@
-import { useAuth0 } from '@auth0/auth0-react'
-import  { useEffect, useRef } from 'react'
-import { useCreateMyUser } from '../api/MyUserApi';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import {
+  useCreateMyUser,
+  useGetMyUser,
+  useUpdateMyUser,
+} from "../api/MyUserApi";
+import { useNavigate } from "react-router-dom";
+import { useKeycloak } from "react-keycloak-js";
 
 const AuthCallbackPage = () => {
-    const navigate = useNavigate();
-    const {user} = useAuth0();
-    const {createUser} = useCreateMyUser();
-    const hasCreatedUser = useRef(false);
-    useEffect(() => {
-      if(user?.sub && user?.email && !hasCreatedUser.current){
-        createUser({auth0Id:user.sub , email:user.email});
-        hasCreatedUser.current = true;
-      }
-    
-      navigate("/")
-    }, [createUser,navigate,user])
-    
+  const navigate = useNavigate();
+  const { keycloak } = useKeycloak();
 
-  return (
-    <div>AuthCallbackPage</div>
-  )
-}
+  const { createUser } = useCreateMyUser();
+  const { currentUser } = useGetMyUser();
+  const hasCreatedUser = useRef(false);
+  if (
+    keycloak?.tokenParsed?.email == currentUser?.email &&
+    keycloak?.tokenParsed?.sub != currentUser?.auth0Id
+  ) {
+    hasCreatedUser.current = true;
+  }
 
-export default AuthCallbackPage
+  const { updateUser } = useUpdateMyUser();
+  useEffect(() => {
+    if (
+      keycloak?.tokenParsed?.sub &&
+      keycloak?.tokenParsed?.email &&
+      !hasCreatedUser.current
+    ) {
+      createUser({
+        auth0Id: keycloak.tokenParsed?.sub,
+        email: keycloak?.tokenParsed?.email,
+      });
+      hasCreatedUser.current = true;
+    } else if (
+      keycloak?.tokenParsed?.email == currentUser?.email &&
+      keycloak?.tokenParsed?.sub != currentUser?.auth0Id
+    ) {
+      updateUser();
+    }
+    navigate("/");
+  }, [createUser, navigate, keycloak]);
+
+  return <div>AuthCallbackPage</div>;
+};
+
+export default AuthCallbackPage;

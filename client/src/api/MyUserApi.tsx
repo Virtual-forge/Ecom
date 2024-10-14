@@ -1,7 +1,7 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 import { User } from "../types";
+import { useKeycloak } from "react-keycloak-js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,10 +11,10 @@ type CreateUserRequest = {
 };
 
 export const useCreateMyUser = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { keycloak } = useKeycloak();
 
   const createMyUserRequest = async (user: CreateUserRequest) => {
-    const token = await getAccessTokenSilently();
+    const token = keycloak?.idToken;
     const response = await fetch(`${API_BASE_URL}/api/my/user`, {
       method: "POST",
       headers: {
@@ -45,76 +45,86 @@ export const useCreateMyUser = () => {
 };
 
 type UpdateMyUserRequest = {
-    name: string;
-    addressLine1: string;
-    city: string;
-    country: string;
+  name: string;
+  addressLine1: string;
+  city: string;
+  country: string;
+};
+
+export const useUpdateMyUser = () => {
+  const { keycloak } = useKeycloak();
+  const updateMyUserRequest = async () => {
+    const token = keycloak?.idToken;
+    const response = await fetch(`${API_BASE_URL}/api/my/user`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update user");
+    }
   };
 
-  export const useUpdateMyUser = () => {
-    const { getAccessTokenSilently } = useAuth0();
-    const updateMyUserRequest = async (formData: UpdateMyUserRequest) => {
-      const token = await getAccessTokenSilently();
-      const response = await fetch(`${API_BASE_URL}/api/my/user`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update user");
-      }
-    };
-  
   const {
     mutateAsync: updateUser,
     isLoading,
     isSuccess,
     error,
     reset,
-  }= useMutation(updateMyUserRequest);
-  if(isSuccess){
+  } = useMutation(updateMyUserRequest);
+  if (isSuccess) {
     toast.success("User Profile Udpated");
   }
-  if(error){
+  if (error) {
     toast.error(error.toString());
     reset();
   }
 
-
-
-  return {updateUser , isLoading}
+  return { updateUser, isLoading };
 };
-
+type CurentUser = {
+  auth0Id: string;
+  _id: string;
+  email: string;
+  name: string;
+  addressLine1: string;
+  city: string;
+  country: string;
+};
 export const useGetMyUser = () => {
-  const {getAccessTokenSilently} = useAuth0();
+  const { keycloak } = useKeycloak();
 
-  const getMyUserRequest = async ():Promise<User> => {
-    const token = await getAccessTokenSilently();
-    const response = await fetch(`${API_BASE_URL}/api/my/user` , {
-      method:'GET',
-      headers : {
+  const getMyUserRequest = async (): Promise<CurentUser> => {
+    const token = keycloak?.idToken;
+    const response = await fetch(`${API_BASE_URL}/api/my/user`, {
+      method: "GET",
+      headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type":"application/json"
-      }
+        "Content-Type": "application/json",
+      },
     });
 
-    if(!response){
+    if (!response) {
       throw new Error("Failed to fetch user");
-    };
+    }
     return response.json();
+  };
 
+  const {
+    data: currentUser,
+    isLoading,
+    error,
+  } = useQuery("fetchCurrentUser", getMyUserRequest, {
+    enabled: !!keycloak, // Only run the query if the token is available
+  });
+
+  if (error) {
+    toast.error(error.toString());
   }
 
-  const { data:currentUser , isLoading,error} = useQuery("fetchCurrentUser",getMyUserRequest);
-
-  if(error) {
-    toast.error(error.toString());
-  };
-  
-  return {currentUser , isLoading}
-
-}
+  return { currentUser, isLoading };
+};

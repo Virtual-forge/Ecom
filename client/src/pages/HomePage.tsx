@@ -2,12 +2,38 @@ import landing from "../assets/landing.png";
 import appDownload from "../assets/appDownload.png";
 import SearchBar, { SearchForm } from "../components/SearchBar";
 import { useNavigate } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+
 import RecentOrders from "../components/RecentOrders";
+import { useKeycloak } from "react-keycloak-js";
+import { useCreateMyUser } from "../api/MyUserApi";
+import { useEffect, useRef } from "react";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth0();
+  const { keycloak } = useKeycloak();
+
+  const { createUser } = useCreateMyUser();
+  const hasCreatedUser = useRef(false);
+  useEffect(() => {
+    if (
+      keycloak?.tokenParsed?.sub &&
+      keycloak?.tokenParsed?.email &&
+      !hasCreatedUser.current
+    ) {
+      createUser({
+        auth0Id: keycloak.tokenParsed.sub,
+        email: keycloak.tokenParsed.email,
+      })
+        .then(() => {
+          hasCreatedUser.current = true;
+        })
+        .catch((error) => {
+          console.error("Error creating user:", error);
+        });
+    }
+  }, [keycloak]);
+
+  const { authenticated } = useKeycloak();
   const handleSearchSubmit = (searchFromValues: SearchForm) => {
     navigate({
       pathname: `/search/${searchFromValues.searchQuery}`,
@@ -20,7 +46,7 @@ const HomePage = () => {
           Tuck into a takeway today
         </h1>
         <span className="text-xl ">Food is just a click away</span>
-        {isAuthenticated ? (
+        {authenticated ? (
           <div className="flex flex-col gap-2">
             <RecentOrders />
             <SearchBar

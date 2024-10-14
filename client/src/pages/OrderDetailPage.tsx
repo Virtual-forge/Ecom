@@ -15,7 +15,7 @@ import { AspectRatio } from "../components/ui/aspect-ratio";
 
 const OrderDetailPage = () => {
   const { orderId } = useParams();
-  const { order, isLoading } = useGetOrder("66c3faec8102e2e1a0ca48cb");
+  const { order, isLoading } = useGetOrder(orderId);
 
   if (isLoading) {
     return <span className="text-xl animate-pulse">...loading</span>;

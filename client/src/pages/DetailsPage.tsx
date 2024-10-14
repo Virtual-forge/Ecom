@@ -7,11 +7,9 @@ import { useState } from "react";
 import { Card, CardFooter } from "../components/ui/card";
 import OrderSummary from "../components/OrderSummary";
 import { MenuItem } from "../types";
-import { CarIcon } from "lucide-react";
 import CheckoutButton from "../components/CheckoutButton";
 import { UserFormData } from "../forms/user-profile-form/UserProfileForm";
 import { CreateOrderRequest, useCreateOrder } from "../api/OrderApi";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useGetMyUser } from "../api/MyUserApi";
 import { toast } from "sonner";
 

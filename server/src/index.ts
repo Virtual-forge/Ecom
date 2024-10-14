@@ -8,7 +8,6 @@ import RestaurantRoute from "./routes/RestaurantRoute";
 import { v2 as cloudinary } from "cloudinary";
 import OrderRoute from "./routes/OrderRoute";
 import ContactRoute from "./routes/ContactRoute";
-
 mongoose
   .connect(process.env.MONGODB_CONNECTIOn_STRING as string)
   .then(() => console.log("connected to DB"));
@@ -18,9 +17,10 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
+// const memoryStore = new session.MemoryStore();
+// const keycloak = new Keycloak({ store: memoryStore });
 const app = express();
-
+// app.use(keycloak.middleware());
 app.use(express.json());
 app.use(cors());
 app.listen(7000, () => {

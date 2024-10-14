@@ -1,7 +1,7 @@
 import express from "express";
 import OrderController from "../controllers/OrderController";
 import { param } from "express-validator";
-import { jwtCheck, jwtParse } from "../middleware/auth";
+import {  jwtParse } from "../middleware/auth";
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.get(
     .withMessage("orderId paramenter must be a valid string"),
   OrderController.getOrderById
 );
-router.get("/user", jwtCheck, jwtParse, OrderController.getOrderByUser);
+router.get("/user", jwtParse, OrderController.getOrderByUser);
 router.get(
   "/restaurant/:restaurantId",
   param("restaurantId")

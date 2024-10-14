@@ -2,10 +2,7 @@ import { useMutation, useQuery } from "react-query";
 import { UserFormData } from "../forms/user-profile-form/UserProfileForm";
 import { CartItem } from "../pages/DetailsPage";
 import { Restaurant, User } from "../types";
-import { error } from "console";
-import { METHODS } from "http";
-import { promises } from "dns";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useKeycloak } from "react-keycloak-js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -75,9 +72,9 @@ export const useGetOrder = (orderId?: string) => {
 };
 
 export const useGetOrderByUser = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { keycloak } = useKeycloak();
   const getOrderByUser = async (): Promise<Order[]> => {
-    const token = await getAccessTokenSilently();
+    const token = keycloak?.idToken;
     const response = await fetch(`${API_BASE_URL}/api/orders/user`, {
       method: "GET",
       headers: {
